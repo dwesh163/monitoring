@@ -13,11 +13,17 @@ echo "Docker has been successfully installed."
 
 #creating folders for Docker
 mkdir "grafana"
+chmod 777 "grafana"
 mkdir "grafana/data"
-echo "Grafana Folder created."
+chmod 777 "grafana/data"
+echo "Grafana Folders created."
+
 mkdir "prometheus"
+chmod 777 "prometheus"
 mkdir "prometheus/data"
-echo "Prometheus Folder created."
+chmod 777 "prometheus/data"
+echo "Prometheus Folders created."
+
 
 # Copy data
 cp -r "files/grafana/"* "grafana"
@@ -25,8 +31,12 @@ cp "files/prometheus_main.yml" "prometheus/prometheus.yml"
 
 echo "File copied."
 
+#create network
+docker network create monitoring
+echo "network monitoring created"
+
 #Run Docker
-docker run -d \
+sudo docker run -d \
   --name cadvisor \
   --restart always \
   --network monitoring \
@@ -40,21 +50,22 @@ docker run -d \
 
 echo "cAdvisor container started."
 
-docker run -d \
+sudo docker run -d \
   --name grafana \
   --restart always \
   --network monitoring \
-  -v /srv/grafana/data:/var/lib/grafana \
-  -v /srv/grafana/provisioning:/etc/grafana/provisioning \
-  -v /srv/grafana/dashboards:/var/lib/grafana/dashboards \
+  -v "$(pwd)"/grafana/data:/var/lib/grafana \
+  -v "$(pwd)"/grafana/provisioning:/etc/grafana/provisioning \
+  -v "$(pwd)"/grafana/dashboards:/var/lib/grafana/dashboards \
   -e GF_AUTH_ANONYMOUS_ENABLED=true \
   -e GF_AUTH_ANONYMOUS_ORG_ROLE=Admin \
   -p 3000:3000 \
-  grafana/grafana
+  grafana/grafana-enterprise
+
 
 echo "Grafana container started."
 
-docker run -d \
+sudo docker run -d \
   --name node-exporter \
   --restart always \
   --network monitoring \
@@ -65,25 +76,25 @@ docker run -d \
   --path.procfs=/host/proc \
   --path.rootfs=/rootfs \
   --path.sysfs=/host/sys \
-  --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)
 
 echo "Node Exporter container started."
 
-docker run -d \
+sudo docker run -d \
   --name prometheus \
   --restart always \
   --network monitoring \
-  -v /srv/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml \
-  -v /srv/prometheus/prometheus_alerts_rules.yml:/etc/prometheus/rules/prometheus_alerts_rules.yml \
-  -v /srv/prometheus/data:/prometheus \
+  -p 9090:9090 \
+  -v "$(pwd)"/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml \
+  -v "$(pwd)"/prometheus/data:/prometheus \
   prom/prometheus \
   --config.file=/etc/prometheus/prometheus.yml \
   --storage.tsdb.path=/prometheus \
   --web.console.libraries=/etc/prometheus/console_libraries \
   --web.console.templates=/etc/prometheus/consoles \
   --web.enable-lifecycle \
-  -p 9090:9090
 
 echo "Prometheus container started."
+
+docker ps
 
 
