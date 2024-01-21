@@ -1,14 +1,14 @@
-Configurer un **monitoring** avec Grafana, Prometheus, Node Exporter
+# Configurer un **monitoring** avec Grafana, Prometheus, Node Exporter
 
 Dans ce **README**, vous trouverez toutes les étapes pour configurer et installer un **monitoring** de base sur un système Linux à l'aide de Grafana, Prometheus et Node Exporter.
 
 Pour commencer vous devez prealablement avoir installer docker sur votre machine
 
-### Prérequis
+## Prérequis
 
 Avant de commencer, assurez-vous d'avoir Docker installé sur votre machine. Si ce n'est pas déjà le cas, suivez les instructions appropriées pour l'installation de Docker.
 
-### Monitoring
+## Monitoring
 
 Le monitoring est divisé en trois parties.
 
