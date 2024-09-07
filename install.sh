@@ -108,10 +108,10 @@ sudo docker run -d \
   nodered/node-red
 echo "Node-Red container started."
 
-sudo docker create network moodle-network
+sudo docker network create moodle-network
 echo "Moodle network created."
 
-docker run -d \
+sudo docker run -d \
   --name mariadb \
   --env ALLOW_EMPTY_PASSWORD=yes \
   --env MARIADB_USER=bn_moodle \
@@ -121,7 +121,7 @@ docker run -d \
   -v "$(pwd)"/moodle/mariadb:/bitnami/mariadb \
   bitnami/mariadb:latest
 
-docker run -d \
+sudo docker run -d \
   --name moodle \
   -p 3030:8080 -p 8443:8443 \
   --env ALLOW_EMPTY_PASSWORD=yes \
@@ -134,7 +134,7 @@ docker run -d \
   bitnami/moodle:latest
 echo "Moodle containers started."
 
-docker run -d \
+sudo docker run -d \
   -name traefik \
   -p 80:80 -p 8080:8080 \
   -v /var/run/docker.sock:/var/run/docker.sock \
