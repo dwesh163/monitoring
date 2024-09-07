@@ -152,6 +152,6 @@ sudo docker run -d \
   traefik:v2.5
 echo "Traefik container started."
 
-sudo docker ps
+docker ps
 
 
