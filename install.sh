@@ -2,15 +2,11 @@
 
 #creating folders for Docker
 mkdir "grafana"
-chmod 777 "grafana"
 mkdir "grafana/data"
-chmod 777 "grafana/data"
 echo "Grafana Folders created."
 
 mkdir "prometheus"
-chmod 777 "prometheus"
 mkdir "prometheus/data"
-chmod 777 "prometheus/data"
 echo "Prometheus Folders created."
 
 
@@ -21,11 +17,11 @@ cp "files/prometheus_main.yml" "prometheus/prometheus.yml"
 echo "File copied."
 
 #create network
-sudo docker network create monitoring
+docker network create monitoring
 echo "network monitoring created"
 
 #Run Docker
-sudo docker run -d \
+docker run -d \
   --name cadvisor \
   --restart always \
   --network monitoring \
@@ -38,7 +34,7 @@ sudo docker run -d \
 
 echo "cAdvisor container started."
 
-sudo docker run -d \
+docker run -d \
   --name grafana \
   --restart always \
   --network monitoring \
@@ -52,7 +48,7 @@ sudo docker run -d \
 
 echo "Grafana container started."
 
-sudo docker run -d \
+docker run -d \
   --name node-exporter \
   --restart always \
   --network monitoring \
@@ -66,7 +62,7 @@ sudo docker run -d \
 
 echo "Node Exporter container started."
 
-sudo docker run -d \
+docker run -d \
   --name prometheus \
   --restart always \
   --network monitoring \
@@ -82,7 +78,7 @@ sudo docker run -d \
 
 echo "Prometheus container started."
 
-sudo docker run -d \
+docker run -d \
   --name nodered \
   --restart always \
   -p 1880:1880 \
@@ -90,20 +86,12 @@ sudo docker run -d \
   nodered/node-red
 echo "Node-Red container started."
 
-sudo docker network create moodle-network
+docker network create moodle-network
 echo "Moodle network created."
 
 mkdir "moodle"
-chmod 777 "moodle"
-mkdir "moodle/mariadb"
-chmod 777 "moodle/mariadb"
-mkdir "moodle/moodle"
-chmod 777 "moodle/moodle"
-mkdir "moodle/moodledata"
-chmod 777 "moodle/moodledata"
-echo "Moodle Folders created."
 
-sudo docker run -d \
+docker run -d \
   --name mariadb \
   --env ALLOW_EMPTY_PASSWORD=yes \
   --env MARIADB_USER=bn_moodle \
@@ -113,7 +101,7 @@ sudo docker run -d \
   -v "$(pwd)"/moodle/mariadb:/bitnami/mariadb \
   bitnami/mariadb:latest
 
-sudo docker run -d \
+docker run -d \
   --name moodle \
   -p 3030:8080 -p 8443:8443 \
   --env ALLOW_EMPTY_PASSWORD=yes \
@@ -126,7 +114,7 @@ sudo docker run -d \
   bitnami/moodle:latest
 echo "Moodle containers started."
 
-sudo docker run -d \
+docker run -d \
   -name traefik \
   -p 80:80 -p 8080:8080 \
   -v /var/run/docker.sock:/var/run/docker.sock \
