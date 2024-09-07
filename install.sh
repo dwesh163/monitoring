@@ -78,6 +78,8 @@ docker run -d \
 
 echo "Prometheus container started."
 
+mkdir "nodered"
+
 docker run -d \
   --name nodered \
   --restart always \
