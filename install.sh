@@ -111,6 +111,16 @@ echo "Node-Red container started."
 sudo docker network create moodle-network
 echo "Moodle network created."
 
+mkdir "moodle"
+chmod 777 "moodle"
+mkdir "moodle/mariadb"
+chmod 777 "moodle/mariadb"
+mkdir "moodle/moodle"
+chmod 777 "moodle/moodle"
+mkdir "moodle/moodledata"
+chmod 777 "moodle/moodledata"
+echo "Moodle Folders created."
+
 sudo docker run -d \
   --name mariadb \
   --env ALLOW_EMPTY_PASSWORD=yes \
