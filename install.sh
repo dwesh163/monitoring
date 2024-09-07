@@ -4,11 +4,18 @@
 sudo apt update
 
 #Install Docker
-sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+sudo apt-get -y install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 sudo apt-get update
-sudo apt install -y docker-ce
+sudo apt-get -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+#Add user to Docker group
+sudo groupadd docker
+sudo usermod -aG docker $USER
+
 echo "Docker has been successfully installed."
 
 #creating folders for Docker
@@ -32,7 +39,7 @@ cp "files/prometheus_main.yml" "prometheus/prometheus.yml"
 echo "File copied."
 
 #create network
-docker network create monitoring
+sudo docker network create monitoring
 echo "network monitoring created"
 
 #Run Docker
@@ -45,7 +52,7 @@ sudo docker run -d \
   -v /sys:/sys:ro \
   -v /var/lib/docker/:/var/lib/docker:ro \
   -v /dev/disk/:/dev/disk:ro \
-  -p 9101:8080 \
+  -p 8080:8080 \
   zcube/cadvisor
 
 echo "cAdvisor container started."
@@ -95,6 +102,6 @@ sudo docker run -d \
 
 echo "Prometheus container started."
 
-docker ps
+sudo docker ps
 
 
