@@ -52,7 +52,6 @@ sudo docker run -d \
   -v /sys:/sys:ro \
   -v /var/lib/docker/:/var/lib/docker:ro \
   -v /dev/disk/:/dev/disk:ro \
-  -p 8080:8080 \
   zcube/cadvisor
 
 echo "cAdvisor container started."
@@ -68,7 +67,6 @@ sudo docker run -d \
   -e GF_AUTH_ANONYMOUS_ORG_ROLE=Admin \
   -p 3000:3000 \
   grafana/grafana-enterprise
-
 
 echo "Grafana container started."
 
@@ -101,6 +99,47 @@ sudo docker run -d \
   --web.enable-lifecycle \
 
 echo "Prometheus container started."
+
+sudo docker run -d \
+  --name nodered \
+  --restart always \
+  -p 1880:1880 \
+  -v "$(pwd)"/nodered:/data \
+  nodered/node-red
+echo "Node-Red container started."
+
+sudo docker create network moodle-network
+echo "Moodle network created."
+
+docker run -d \
+  --name mariadb \
+  --env ALLOW_EMPTY_PASSWORD=yes \
+  --env MARIADB_USER=bn_moodle \
+  --env MARIADB_PASSWORD=bitnami \
+  --env MARIADB_DATABASE=bitnami_moodle \
+  --network moodle-network \
+  -v "$(pwd)"/moodle/mariadb:/bitnami/mariadb \
+  bitnami/mariadb:latest
+
+docker run -d \
+  --name moodle \
+  -p 3030:8080 -p 8443:8443 \
+  --env ALLOW_EMPTY_PASSWORD=yes \
+  --env MOODLE_DATABASE_USER=bn_moodle \
+  --env MOODLE_DATABASE_PASSWORD=bitnami \
+  --env MOODLE_DATABASE_NAME=bitnami_moodle \
+  --network moodle-network \
+  -v "$(pwd)"/moodle/moodle:/bitnami/moodle \
+  -v "$(pwd)"/moodle/moodledata:/bitnami/moodledata \
+  bitnami/moodle:latest
+echo "Moodle containers started."
+
+docker run -d \
+  -name traefik \
+  -p 80:80 -p 8080:8080 \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  traefik:v2.5
+echo "Traefik container started."
 
 sudo docker ps
 
