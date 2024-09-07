@@ -11,6 +11,9 @@ echo "Prometheus Folders created."
 cp -r "files/grafana/"* "grafana"
 cp "files/prometheus_main.yml" "prometheus/prometheus.yml"
 
+sudo chown -R 755:755 prometheus
+sudo chown -R 755:755 grafana
+
 echo "File copied."
 
 #create network
