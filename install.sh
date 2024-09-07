@@ -2,11 +2,15 @@
 
 #creating folders for Docker
 mkdir "grafana"
+chmod 777 "grafana"
 mkdir "grafana/data"
+chmod 777 "grafana/data"
 echo "Grafana Folders created."
 
 mkdir "prometheus"
+chmod 777 "prometheus"
 mkdir "prometheus/data"
+chmod 777 "prometheus/data"
 echo "Prometheus Folders created."
 
 
@@ -78,8 +82,6 @@ docker run -d \
 
 echo "Prometheus container started."
 
-mkdir "nodered"
-
 docker run -d \
   --name nodered \
   --restart always \
@@ -92,6 +94,14 @@ docker network create moodle-network
 echo "Moodle network created."
 
 mkdir "moodle"
+chmod 777 "moodle"
+mkdir "moodle/mariadb"
+chmod 777 "moodle/mariadb"
+mkdir "moodle/moodle"
+chmod 777 "moodle/moodle"
+mkdir "moodle/moodledata"
+chmod 777 "moodle/moodledata"
+echo "Moodle Folders created."
 
 docker run -d \
   --name mariadb \
