@@ -2,11 +2,9 @@
 
 #creating folders for Docker
 mkdir "grafana"
-mkdir "grafana/data"
 echo "Grafana Folders created."
 
 mkdir "prometheus"
-mkdir "prometheus/data"
 echo "Prometheus Folders created."
 
 # Copy data
@@ -88,10 +86,6 @@ echo "Node-Red container started."
 docker network create moodle-network
 echo "Moodle network created."
 
-mkdir "moodle"
-mkdir "moodle/mariadb"
-mkdir "moodle/moodle"
-mkdir "moodle/moodledata"
 echo "Moodle Folders created."
 
 docker run -d \
