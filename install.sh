@@ -1,27 +1,41 @@
 #!/bin/bash
 
-#creating folders for Docker
-mkdir "grafana"
-echo "Grafana Folders created."
+# Création des dossiers pour Docker avec des permissions adaptées aux utilisateurs des conteneurs
+sudo mkdir -p "grafana/data"
+echo "Dossiers Grafana créés avec permissions adaptées."
 
-mkdir "prometheus"
-echo "Prometheus Folders created."
+sudo mkdir -p "prometheus/data"
+echo "Dossiers Prometheus créés avec permissions adaptées."
 
-# Copy data
-cp -r "files/grafana/"* "grafana"
-cp "files/prometheus_main.yml" "prometheus/prometheus.yml"
+sudo mkdir -p "nodered"
+echo "Dossier Node-Red créé avec permissions adaptées."
 
-sudo chown -R 755:755 prometheus
-sudo chown -R 755:755 grafana
+sudo mkdir -p "moodle/mariadb" "moodle/moodle" "moodle/moodledata"
+echo "Dossiers Moodle créés avec permissions adaptées."
 
-echo "File copied."
+# Copier les fichiers
+sudo cp -r "files/grafana/"* "grafana"
+sudo cp "files/prometheus_main.yml" "prometheus/prometheus.yml"
+echo "Fichiers copiés."
 
-#create network
+# Donne tous les droits au propriétaire, lecture/écriture/exécution pour le groupe, lecture/exécution pour les autres
+sudo chmod -R 755 grafana prometheus nodered moodle
+
+# Assurez-vous que les dossiers appartiennent aux bons utilisateurs du conteneur Docker
+sudo chown -R 472:472 grafana        # Utilisateur Grafana (UID 472)
+sudo chown -R nobody:nogroup prometheus # Utilisateur Prometheus (généralement nobody)
+sudo chown -R 1000:1000 nodered       # Utilisateur Node-RED (UID 1000)
+sudo chown -R 1001:1001 moodle        # Utilisateur Moodle (Bitnami UID 1001)
+
+
+# Créer un réseau pour la surveillance
 docker network create monitoring
-echo "network monitoring created"
+echo "Réseau monitoring créé."
 
-#Run Docker
-docker run -d \
+# Lancer les conteneurs Docker
+
+# cAdvisor
+sudo docker run -d \
   --name cadvisor \
   --restart always \
   --network monitoring \
@@ -31,10 +45,10 @@ docker run -d \
   -v /var/lib/docker/:/var/lib/docker:ro \
   -v /dev/disk/:/dev/disk:ro \
   zcube/cadvisor
+echo "Conteneur cAdvisor démarré."
 
-echo "cAdvisor container started."
-
-docker run -d \
+# Grafana
+sudo docker run -d \
   --name grafana \
   --restart always \
   --network monitoring \
@@ -45,10 +59,10 @@ docker run -d \
   -e GF_AUTH_ANONYMOUS_ORG_ROLE=Admin \
   -p 3000:3000 \
   grafana/grafana-enterprise
+echo "Conteneur Grafana démarré."
 
-echo "Grafana container started."
-
-docker run -d \
+# Node Exporter
+sudo docker run -d \
   --name node-exporter \
   --restart always \
   --network monitoring \
@@ -58,11 +72,11 @@ docker run -d \
   prom/node-exporter \
   --path.procfs=/host/proc \
   --path.rootfs=/rootfs \
-  --path.sysfs=/host/sys \
+  --path.sysfs=/host/sys
+echo "Conteneur Node Exporter démarré."
 
-echo "Node Exporter container started."
-
-docker run -d \
+# Prometheus
+sudo docker run -d \
   --name prometheus \
   --restart always \
   --network monitoring \
@@ -74,24 +88,24 @@ docker run -d \
   --storage.tsdb.path=/prometheus \
   --web.console.libraries=/etc/prometheus/console_libraries \
   --web.console.templates=/etc/prometheus/consoles \
-  --web.enable-lifecycle \
+  --web.enable-lifecycle
+echo "Conteneur Prometheus démarré."
 
-echo "Prometheus container started."
-
-docker run -d \
+# Node-Red
+sudo docker run -d \
   --name nodered \
   --restart always \
   -p 1880:1880 \
   -v "$(pwd)"/nodered:/data \
   nodered/node-red
-echo "Node-Red container started."
+echo "Conteneur Node-Red démarré."
 
+# Créer un réseau pour Moodle
 docker network create moodle-network
-echo "Moodle network created."
+echo "Réseau Moodle créé."
 
-echo "Moodle Folders created."
-
-docker run -d \
+# MariaDB pour Moodle
+sudo docker run -d \
   --name mariadb \
   --env ALLOW_EMPTY_PASSWORD=yes \
   --env MARIADB_USER=bn_moodle \
@@ -101,7 +115,8 @@ docker run -d \
   -v "$(pwd)"/moodle/mariadb:/bitnami/mariadb \
   bitnami/mariadb:latest
 
-docker run -d \
+# Moodle
+sudo docker run -d \
   --name moodle \
   -p 3030:8080 -p 8443:8443 \
   --env ALLOW_EMPTY_PASSWORD=yes \
@@ -112,15 +127,15 @@ docker run -d \
   -v "$(pwd)"/moodle/moodle:/bitnami/moodle \
   -v "$(pwd)"/moodle/moodledata:/bitnami/moodledata \
   bitnami/moodle:latest
-echo "Moodle containers started."
+echo "Conteneurs Moodle démarrés."
 
-docker run -d \
-  -name traefik \
+# Traefik
+sudo docker run -d \
+  --name traefik \
   -p 80:80 -p 8080:8080 \
   -v /var/run/docker.sock:/var/run/docker.sock \
   traefik:v2.5
-echo "Traefik container started."
+echo "Conteneur Traefik démarré."
 
+# Afficher les conteneurs en cours d'exécution
 docker ps
-
-
